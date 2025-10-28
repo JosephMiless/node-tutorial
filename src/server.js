@@ -59,7 +59,7 @@ app.use(express.json());
 app.use(router);
 
 app.listen(config.port, () => {
-    console.log(`server running on ${config.port}`);
+    console.log(`server1 running on ${config.port}`);
 });
 
 router.get('/', (req, res) => {
