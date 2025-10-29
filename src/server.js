@@ -66,7 +66,21 @@ router.get('/', (req, res) => {
 });
 
 router.get('/users', (req, res) => {
-  res.send(users)
+
+  // grab user id from the url
+  const {id} = req.query;
+
+  if(id){
+
+    const user = users.find((user) => user.id === id);
+
+    if(!user) return res.status(404).json({error: `no user found with id: ${id} `});
+
+    return res.status(200).json({user});
+
+  };
+
+  return res.status(200).json({users});
 });
 
 router.post('/users/register', async (req, res) => {
