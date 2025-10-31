@@ -6,6 +6,12 @@ import { hashPassword } from './utils/bcrypt.js';
 
 const app = express();
 
+const router = Router();
+
+app.use(express.json());
+
+app.use(router);
+
 const users = [
   {
     id: "u1",
@@ -54,15 +60,10 @@ const users = [
   }
 ];
 
-const router = Router();
-
-app.use(express.json());
-
-app.use(router);
 
 
 router.get('/', (req, res) => {
-  res.send("Hello Earth")
+  res.send("Hello Earth");
 });
 
 router.get('/users', (req, res) => {
@@ -72,16 +73,42 @@ router.get('/users', (req, res) => {
 
   if(id){
 
+    // check if user exists with the provided id
     const user = users.find((user) => user.id === id);
 
+    // throw an error if user isn't found
     if(!user) return res.status(404).json({error: `no user found with id: ${id} `});
 
+    // return the found user
     return res.status(200).json({user});
 
   };
 
+  // if no id was sent in the url, return all users
   return res.status(200).json({users});
 });
+
+// router.post('/users', (req, res) => {
+
+//   //grab data from frontend
+//   const {id, firstName, lastName, email} = req.body;
+
+//   if(!id ) return res.status(400).json({error: "Kindly fill out id field"});
+//   if(!firstName) return res.status(400).json({error: "Kindly fill out firstname field"});
+//   if(!lastName) return res.status(400).json({error: "Kindly fill out lastname field"});
+//   if(!email) return res.status(400).json({error: "Kindly fill out email field"});
+
+//   // check if the user already exists by email
+//   const user = users.find((user) => user.email === email);
+
+//   if(user) return res.status(400).json({error: "user already exists with that email"});
+
+//   users.push({id, firstName, lastName, email});
+
+//   return res.status(201).json({message: 'user registered successfully', users});
+
+
+// });
 
 router.post('/users/register', async (req, res) => {
 
@@ -127,6 +154,23 @@ router.post('/users/login', async (req, res) => {
   // login upon successful validation
   return res.status(200).json({message: "User logged in successfully!"});
   
+});
+
+router.patch('/users/:id', (req, res) => {
+
+  // extract id from query params
+  const id = req.params.id;
+
+  // validate user input
+  if(!id) return res.status(400).json({error: "id is required"});
+
+  // check if user with id exists
+  const userExists = users.find((user) => user.id === id);
+
+  // return an error if user doesnt exist
+  if(!userExists) return res.status(404).json({error: `user not found with id ${id}`});
+
+  return res.json({message: "patch endpoint"});
 });
 
 router.get('/products', async (req, res) => {
