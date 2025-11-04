@@ -2,7 +2,8 @@ import express from 'express';
 import { Router } from 'express';
 import { config } from './config/env.js';
 import { signupUserSchema } from './validators/user.js';
-import { hashPassword } from './utils/bcrypt.js';
+import { comparePassword, hashPassword } from './utils/bcrypt.js';
+import { addProdcutsSchema } from './validators/products.js';
 
 const app = express();
 
@@ -60,7 +61,27 @@ const users = [
   }
 ];
 
-
+const products =[
+    {
+        
+  "name": "Laptop",
+  "id": 2,
+  "price": 2500000,
+  "category": "Electronics"
+},
+{
+  "name": "spoon",
+  "id": 4,
+  "price": 2500,
+  "category": "Kitchen Utensils"
+},
+{
+    "id": 6,
+    "name": "Rolex",
+    "price": 450000,
+    "category": "Wristwatches"
+}
+];
 
 router.get('/', (req, res) => {
   res.send("Hello Earth");
@@ -119,7 +140,7 @@ router.post('/users/register', async (req, res) => {
   if(error) return res.status(400).json({error: error.message});
   
   // destructure user data into variable "value"
-  const {id, firstName, lastName, email, password, role, createdAt} = value;
+  let {id, firstName, lastName, email, password, role, createdAt} = value;
 
   // check if user already exists with the email
   const user = users.find((user) => user.email === email);
@@ -128,9 +149,9 @@ router.post('/users/register', async (req, res) => {
   if(user) return res.status(400).json({error: "Account already exists"});
   
   // hash, or encrypt user's password before storing into DB
-  const hashedPassword = await hashPassword(password);
+  value.password = await hashPassword(password);
   
-  users.push({ id, firstName, lastName, email, password:hashedPassword, role, createdAt});
+  users.push(value);
   return res.status(201).json({message: "user registered sucessfully", users});
 });
 
@@ -149,7 +170,7 @@ router.post('/users/login', async (req, res) => {
   if(!userExists) return res.status(404).json({error: "User not found. Kindly create an account to login"});
 
   // check user's password
-  if(userExists.password !== password) return res.status(400).json({error: "Invalid credentials"});
+  const isMatch = await comparePassword(password, );
 
   // login upon successful validation
   return res.status(200).json({message: "User logged in successfully!"});
@@ -173,8 +194,53 @@ router.patch('/users/:id', (req, res) => {
   return res.json({message: "patch endpoint"});
 });
 
-router.get('/products', async (req, res) => {
-  res.send("This is thje product endpoint")
+router.get('/products', (req, res) => {
+  return res.status(200).json({products});
+});
+
+
+router.post('/products', (req, res) => {
+
+  // get data from fontend
+  const {error, value} = addProdcutsSchema.validate(req.body);
+
+  // throw an error if needed
+  if(error) return res.status(400).json({error: error.message});
+
+  // destructure value coming from frontend
+  const {name, id, price, category} = value;
+
+  // check if product exists already
+  const productExists = products.find((product) => product.id === value.id);
+
+  // throw an error if product exists
+  if(productExists) return res.status(400).json({error: `product exists with id: ${id}`});
+
+  // save product of no error
+  products.push(value);
+
+  return res.status(201).json({message: `Product added successfully`, products});
+
+});
+
+router.delete('/products/:id', (req, res) => {
+
+  // grab id from the request params
+  const id = req.params.id;
+
+  // check if product with id exists
+
+  const productExists = products.find((exixts) => exixts.id === parseInt(id));
+
+  // throw error if product is not found
+  if(!productExists) return res.status(404).json({error: `product not found with id ${id}`});
+
+  // delete product
+  const productsLeft = products.filter((product) => product.id !== parseInt(id));
+
+  // return products left
+  return res.status(201).json({meessage: `product deleted successfully: `, productsLeft});
+
 });
 
   app.listen(config.port, () => {
