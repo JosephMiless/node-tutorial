@@ -17,6 +17,8 @@ export const getAllProdcts = (req, res) => {
 export const addProducts = (req, res) => {
     try {
 
+        console.log("abc", req.headers);
+
           // get data from fontend
   const {error, value} = addProdcutsSchema.validate(req.body);
   

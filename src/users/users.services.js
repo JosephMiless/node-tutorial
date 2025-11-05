@@ -43,5 +43,23 @@ export const users = [
     password: "hashed_password_5",
     role: "user",
     createdAt: "2025-05-25T16:00:00Z"
-  }
+  },
+  {
+            id: "u7",
+            firstName: "Benjamin",
+            lastName: "8ruihfjewo",
+            email: "ben.ogunleye@example.com",
+            password: "$2b$10$DFyXo8DeP8eZclJCFDbJve.0lBiBTMnSI8xBjSjvQeE7Fh7N0gjz2",
+            role: "admin",
+            createdAt: "2025-05-25T16:00:00.000Z"
+        },
+        {
+            id: "u7",
+            firstName: "Benjamin",
+            lastName: "8ruihfjewo",
+            email: "ben1.ogunleye@example.com",
+            password: "$2b$10$Q2hp2r.Zi11KCmiIjU/GZeu2bgqsazjknL3GDvqeLAXZkMnBW/HAW",
+            role: "user",
+            createdAt: "2025-05-25T16:00:00.000Z"
+        }
 ];
