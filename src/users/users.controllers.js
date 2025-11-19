@@ -1,7 +1,7 @@
-import { users } from "./users.services.js";
 import { signupUserSchema } from '../validators/user.js';
 import { comparePassword, hashPassword } from '../utils/bcrypt.js';
 import { aToken } from '../tokens/jwt.js';
+import { findUserByEmail, signUpUser } from './users.services.js';
 
 
 
@@ -15,19 +15,20 @@ export const signUpUserController = async (req, res) => {
           if(error) return res.status(400).json({error: error.message});
           
           // destructure user data into variable "value"
-          let {id, firstName, lastName, email, password, role, createdAt} = value;
+          let { firstName, lastName, email, password} = value;
           
           // check if user already exists with the email
-          const user = users.find((user) => user.email === value.email);
-        
+          let user = await findUserByEmail({email: value.email});
+          
           // throw an error if a user was found with that email
           if(user) return res.status(400).json({error: `Account already exists`});
           
           // hash, or encrypt user's password before storing into DB
           value.password = await hashPassword(password);
           
-          users.push(value);
-          return res.status(201).json({message: `user registered sucessfully`, users});
+          user = await signUpUser(value);
+
+          return res.status(201).json({message: `user registered sucessfully`, user});
         
     } catch (error) {
 

@@ -27,6 +27,10 @@ module.exports = {
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
+      }, 
+      password: {
+        type: Sequelize.STRING,
+        allowNull: false
       },
       updatedAt: {
         allowNull: false,
