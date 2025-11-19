@@ -6,4 +6,4 @@ export const userRouter = Router();
 userRouter.post('/signup', userController.signUpUserController);
 userRouter.post('/login', userController.loginUserController);
 userRouter.get('/', userController.getUserController);
-userRouter.patch('/edit', userController.editUserDetailsController);
+userRouter.patch('/edit/:id', userController.editUserDetailsController);

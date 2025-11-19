@@ -18,22 +18,22 @@ export const signUpUserController = async (req, res) => {
           let {id, firstName, lastName, email, password, role, createdAt} = value;
           
           // check if user already exists with the email
-          const user = users.find((user) => user.email === email);
+          const user = users.find((user) => user.email === value.email);
         
           // throw an error if a user was found with that email
-          if(user) return res.status(400).json({error: "Account already exists"});
+          if(user) return res.status(400).json({error: `Account already exists`});
           
           // hash, or encrypt user's password before storing into DB
           value.password = await hashPassword(password);
           
           users.push(value);
-          return res.status(201).json({message: "user registered sucessfully", users});
+          return res.status(201).json({message: `user registered sucessfully`, users});
         
     } catch (error) {
 
-        console.log("Error signing up user", error);
+        console.log(`Error signing up user`, error);
 
-        return res.status(500).json({error: "Internal Server Error"});
+        return res.status(500).json({error: `Internal Server Error`});
         
     }
 };
@@ -70,7 +70,7 @@ export const loginUserController = async (req, res) => {
 
         console.log("Error logging in user", error);
 
-        return res.status(500).json({error: "Internal Server Error"});
+        return res.status(500).json({error: `Internal Server Error`});
         
     }
     
@@ -111,18 +111,18 @@ export const editUserDetailsController = async (req, res) => {
     try {
 
         // extract id from query params
-  const id = req.params.id;
+        const id = req.params.id;
   
-  // check if user with id exists
-  const userExists = users.find((user) => user.id === id);
+        // check if user with id exists
+        const userExists = users.find((user) => user.id === id);
   
-  // return an error if user doesnt exist
-  if(!userExists) return res.status(404).json({error: `user not found with id ${id}`});
+        // return an error if user doesnt exist
+        if(!userExists) return res.status(404).json({error: `user not found with id ${id}`});
   
-  // edit user attributes if no error is found
-  Object.assign(userExists, req.body);
+        // edit user attributes if no error is found
+        Object.assign(userExists, req.body);
   
-  return res.json({message: "User Updated Successfully", users});
+        return res.json({message: "User Updated Successfully", users});
         
     } catch (error) {
 
