@@ -35,10 +35,10 @@ BankAccount.init(
         allowNull: false,
         defaultValue: 0.00
       }, 
-      curreency: {
+      currency: {
         type: DataTypes.STRING,
         defaultValue: 'USD'
-      },
+      }
   },
   {
     sequelize,

@@ -2,6 +2,9 @@ import { signupUserSchema } from '../validators/user.js';
 import { comparePassword, hashPassword } from '../utils/bcrypt.js';
 import { aToken } from '../tokens/jwt.js';
 import { findUserByEmail, signUpUser } from './users.services.js';
+import { generateUniqueNumber } from '../utils/accountNumber.js';
+import { BankAccount } from '../models/bankaccount.js';
+import { createAccount } from '../accounts/accounts.services.js';
 
 
 
@@ -15,11 +18,11 @@ export const signUpUserController = async (req, res) => {
           if(error) return res.status(400).json({error: error.message});
           
           // destructure user data into variable "value"
-          let { firstName, lastName, email, password} = value;
+          let { firstName, lastName, email, SSN, password, accountType} = value;
           
           // check if user already exists with the email
           let user = await findUserByEmail({email: value.email});
-          
+
           // throw an error if a user was found with that email
           if(user) return res.status(400).json({error: `Account already exists`});
           
@@ -28,7 +31,12 @@ export const signUpUserController = async (req, res) => {
           
           user = await signUpUser(value);
 
-          return res.status(201).json({message: `user registered sucessfully`, user});
+        //   create an account for the user if no error
+        let accountNumber = await generateUniqueNumber(10, BankAccount);
+
+        const bankAccount = await createAccount({userID: user.id, accountNumber, accountType});
+
+        return res.status(201).json({message: `user registered sucessfully`, user: user.toJSON(), bank: bankAccount.toJSON()});
         
     } catch (error) {
 

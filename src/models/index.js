@@ -17,12 +17,12 @@ BankAccount.belongsTo(User, {
 });
 
 BankAccount.hasMany(Transaction, {
-  foreignKey: "sourceAcount",
+  foreignKey: "sourceAccount",
   as: "outgoingTransactions"
 });
 
 BankAccount.hasMany(Transaction, {
-  foreignKey: "destinationAcount",
+  foreignKey: "destinationAccount",
   as: "incomingTransactions"
 });
 
@@ -50,4 +50,4 @@ export const initDB = async () => {
   }
 };
 
-export {User, BankAccount};
+export {User, BankAccount, Transaction};

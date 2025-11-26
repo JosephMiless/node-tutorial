@@ -1,46 +1,45 @@
 'use strict';
+
+const { DataTypes } = require('sequelize');
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('transactions', {
+    await queryInterface.createTable('Transactions', {
       id: {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.STRING,
-        defaultValue: Sequelize.UUIDV4,
-        unique: true
-      },
+        defaultValue: DataTypes.UUIDV4
+      }, 
       sourceAccount: {
         type: Sequelize.STRING,
-        allowNull: true,
-        references: {
-          model: 'bankAccounts', key: "id",
-        },
+        references: {model: "bankAccounts", key: 'id'},
         onDelete: "SET NULL",
         onUpdate: "CASCADE"
       }, 
       destinationAccount: {
         type: Sequelize.STRING,
-        allowNull: true,
-        references: {
-          model: "bankAccounts",
-          key: "id"
-        },
+        references: {model: "bankAccounts", key: 'id'},
         onDelete: "SET NULL",
         onUpdate: "CASCADE"
-      }, recipientEmail: {
-        type: Sequelize.STRING,
-        allowNull: false
       }, 
+      recipientEmail: {
+        type: Sequelize.STRING
+      },
       note: {
-        type: Sequelize.STRING,
-      }, 
-      amount: {
+        type: Sequelize.STRING
+      }, amount: {
         type: Sequelize.DECIMAL,
         allowNull: false
       }, 
+      status: {
+        allowNull: false,
+        type: Sequelize.ENUM('processing', 'success', 'failed'),
+        defaultValue: 'processing'
+      }, 
       category: {
-        type: Sequelize.ENUM('deposit', 'withdrawal', 'transfer'),
+        type: Sequelize.ENUM("deposit", "withdrawal", "transfer"),
         allowNull: false
       },
       createdAt: {
@@ -54,6 +53,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('transactions');
+    await queryInterface.dropTable('Transactions');
   }
 };
