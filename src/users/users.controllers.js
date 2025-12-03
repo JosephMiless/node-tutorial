@@ -1,4 +1,4 @@
-import { signupUserSchema } from '../validators/user.js';
+import { loginUserSchema, signupUserSchema } from '../validators/user.js';
 import { comparePassword, hashPassword } from '../utils/bcrypt.js';
 import { aToken } from '../tokens/jwt.js';
 import { findUserByEmail, signUpUser } from './users.services.js';
@@ -51,29 +51,31 @@ export const loginUserController = async (req, res) => {
     try {
 
         // get data from frontend
-  const {email, password} = req.body;
+        const {error, value} = loginUserSchema.validate(req.body);
   
-  // validate user's data manually
-  if(!email || !password) return res.status(400).json({error: "email and password are rquired"});
+        // validate user's data manually
+        if(error) return res.status(400).json({error: error.message});
+
+        const {email, password} = value;
   
-  // check if user exists
-  const userExists = users.find((user) => user.email === email);
+        // check if user exists
+        const userExists = await findUserByEmail({email});
   
-  // throw an error if user is not found
-  if(!userExists) return res.status(404).json({error: "User not found. Kindly create an account to login"});
+        // throw an error if user is not found
+        if(!userExists) return res.status(404).json({error: "User not found. Kindly create an account to login"});
   
-  // check user's password
-  const isMatch = await comparePassword(password, userExists.password);
+        // check user's password
+        const isMatch = await comparePassword(password, userExists.password);
   
-  // throw an error if there's no match
-  if(!isMatch) return res.status(400).json({error: "Inavlid Credentials"});
-  const id = userExists.id;
-  const role = userExists.role;
+        // throw an error if there's no match
+        if(!isMatch) return res.status(400).json({error: "Inavlid Credentials"});
+        const id = userExists.id;
+        const role = userExists.role;
   
-  const accessToken = aToken({id, role});
+        const accessToken = aToken({id, role});
   
-  // login upon successful validation
-  return res.status(200).json({message: "User logged in successfully!", accessToken});
+        // login upon successful validation
+        return res.status(200).json({message: "User logged in successfully!", accessToken});
         
     } catch (error) {
 
@@ -85,24 +87,23 @@ export const loginUserController = async (req, res) => {
     
 };
 
-export const getUserController = (req, res) => {
+export const getUserController = async (req, res) => {
     try {
 
+       const loggedInUser = req.user;
+        
+        console.log(loggedInUser)
         // grab user id from the url
-  const {id} = req.query;
+        const id = loggedInUser.id;
 
-  if(id){
+        // check if user exists with the provided id
+        const user = await findUserByEmail({id});
 
-    // check if user exists with the provided id
-    const user = users.find((user) => user.id === id);
+        // throw an error if user isn't found
+        if(!user) return res.status(404).json({error: `no user found with id: ${id} `});
 
-    // throw an error if user isn't found
-    if(!user) return res.status(404).json({error: `no user found with id: ${id} `});
-
-    // return the found user
-    return res.status(200).json({user});
-
-  };
+        // return the found user
+        return res.status(200).json({user});
 
   // if no id was sent in the url, return all users
   return res.status(200).json({users});

@@ -9,8 +9,6 @@ export const auth = async (req, res, next) => {
         if(!authHeader) {
             return res.status(401).json({error: "Unauthorized, no authHeader"});
     }
-
-    console.log(`token: ${authHeader}`);
     
     const token = authHeader.split(' ')[1];
 
@@ -21,7 +19,6 @@ export const auth = async (req, res, next) => {
         if (error) {
             return res.status(403).json({error: "This session has expired. Kindly re-login"});
         }
-        console.log(user);
         
         req.user = user;
         next();

@@ -8,3 +8,8 @@ export const signupUserSchema = joi.object({
     accountType: joi.string().required(),
     password: joi.string().required().min(8).max(10)
 });
+
+export const loginUserSchema = joi.object({
+    email: joi.string().email().required(),
+    password: joi.string().required().min(8).max(10)
+});
