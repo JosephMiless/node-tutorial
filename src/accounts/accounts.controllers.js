@@ -1,7 +1,9 @@
 import { createAccountScherma } from "../validators/accounts.js";
-import { createAccount, getAccounts } from "./accounts.services.js";
+import { createAccount, findAccount, getAccounts } from "./accounts.services.js";
 import {generateUniqueNumber} from "../utils/accountNumber.js";
 import { BankAccount } from "../models/bankaccount.js";
+import {hashPassword} from "../utils/bcrypt.js";
+import { deposit } from "../deposit/deposit.services.js";
 
 
 export const createAccountController = async (req, res) => {
@@ -15,15 +17,19 @@ export const createAccountController = async (req, res) => {
 
         if(error) return res.status(400).json({error: error.message});
 
-        let {accountType, currency, userID, accountNumber} = value;
+        let {accountType, currency, userID, accountNumber, pin} = value;
+
+        if(!['USD','NGN', 'EUR'].includes(currency)) return res.status(400).json({error: `Enter one of USD, or NGN`});
 
         value.accountNumber = await generateUniqueNumber(10, BankAccount);
 
         value.userID = loggedInUser.id;
 
+        value.pin = await hashPassword(pin);
+
         const account = await createAccount(value);
 
-        return res.status(201).json({account});
+        return res.status(201).json({message:`Account created successfully! 🎉`,account});
         
     } catch (error) {
 
@@ -50,6 +56,39 @@ export const viewAccountsController = async (req, res) => {
     } catch (error) {
 
         console.error(`Error viewing accounts. Error: ${error}`);
+
+        return res.status(500).json({error: `Internal Server Error.`});
+        
+    }
+};
+
+export const updatepin = async (req, res) => {
+    try {
+
+        const loggedInUser = req.user;
+
+        if(!loggedInUser) return res.status(401).json({error: `Unauthorized!`});
+
+        let {pin, accountNumber} = req.body;
+
+        if(!pin || pin.length < 4) return res.status(400).json({error: `4 digits pin is required`});
+        if(!accountNumber) return res.status(400).json({error: `accountNumber is required`});
+
+        const accountExists = await findAccount({accountNumber});
+
+        if(!accountExists) return res.status(404).json({error: `No account foundd with number: ${accountNumber}`});
+
+        if(accountExists.userID !== loggedInUser.id) return res.status*(403).json({error: `Unauthorized!!!`});
+
+        pin = await hashPassword(pin);
+
+        await deposit({pin}, {accountNumber});
+
+        return res.status(200).json({message: `Pin updatd successfully!`});
+        
+    } catch (error) {
+
+        console.error(`Error updating pin. Error: ${error}`);
 
         return res.status(500).json({error: `Internal Server Error.`});
         

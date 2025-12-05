@@ -38,6 +38,11 @@ BankAccount.init(
       currency: {
         type: DataTypes.STRING,
         defaultValue: 'USD'
+      },
+      pin:{
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "password"
       }
   },
   {

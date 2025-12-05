@@ -1,5 +1,6 @@
 import { findAccount, recordTransaction, deposit } from "./deposit.services.js";
 import { createDepositSchema } from "../validators/deposits.js";
+import { sanitize } from "../utils/sanitize.js";
 
 export const createDepositController = async (req, res) => {
 
@@ -33,9 +34,9 @@ export const createDepositController = async (req, res) => {
 
         await deposit({balance: value.balance}, {accountNumber});
 
-        const transaction = await recordTransaction(value);
+        const transaction = await sanitize((await recordTransaction(value)).toJSON());
 
-        return res.status(201).json({message: `Transaction Successful!`, transaction});
+        return res.status(201).json({message: `Transaction Successful!🎉`, transaction});
         
     } catch (error) {
 

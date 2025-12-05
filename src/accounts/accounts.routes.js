@@ -6,3 +6,4 @@ export const accountsRouter = Router();
 
 accountsRouter.post('/', auth, accountController.createAccountController);
 accountsRouter.get('/', auth, accountController.viewAccountsController);
+accountsRouter.patch('/', auth, accountController.updatepin);
