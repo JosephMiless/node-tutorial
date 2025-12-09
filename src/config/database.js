@@ -1,6 +1,5 @@
 import dotenv from 'dotenv';
 import { config } from './env.js';
-dotenv.config();
 
 export default {
     development: {
