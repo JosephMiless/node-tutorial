@@ -1,4 +1,3 @@
-import dotenv from 'dotenv';
 import { config } from './env.js';
 
 export default {
@@ -11,7 +10,7 @@ export default {
         dialect: "postgres",
     },
     production: {
-        use_env_variable: config.databaseURI,
+        use_env_variable: "DATABASE_URL",
         dialect: "postgres",
         dialectOptions: {
         ssl: {
