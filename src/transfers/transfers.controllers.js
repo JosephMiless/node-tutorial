@@ -64,10 +64,6 @@ export const transferController = async (req, res) => {
 
         const transaction = await recordTransaction(value);
 
-        value.category = 'deposit';
-
-        await recordTransaction(value);
-
         return res.status(201).json({message: `Transaction successful! 🎉`, transaction});
         
     } catch (error) {

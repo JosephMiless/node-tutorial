@@ -1,5 +1,5 @@
 import { createAccountScherma } from "../validators/accounts.js";
-import { createAccount, findAccount, getAccounts } from "./accounts.services.js";
+import { createAccount, findAccount, getAccounts, getTransactions } from "./accounts.services.js";
 import {generateUniqueNumber} from "../utils/accountNumber.js";
 import { BankAccount } from "../models/bankaccount.js";
 import {hashPassword} from "../utils/bcrypt.js";
@@ -89,6 +89,40 @@ export const updatepin = async (req, res) => {
     } catch (error) {
 
         console.error(`Error updating pin. Error: ${error}`);
+
+        return res.status(500).json({error: `Internal Server Error.`});
+        
+    }
+};
+
+export const getTransactionsController = async (req, res) => {
+    try {
+
+        const loggedInUser = req.user;
+
+        if(!loggedInUser) return res.status(401).json({error: `Unauthorized!`});        
+
+        let accountID = req.params.id;
+
+        if(!accountID) return res.status(400).json({error: `accountID is required`});
+
+        const accountExists = await findAccount({id: accountID});
+        
+        if(!accountExists) return res.status(404).json({
+            error: `Account not found with id: ${accountID}. Kindly check the number and try again.`
+        });
+
+        if(accountExists.userID !== loggedInUser.id) return res.status(403).json({error: `You are not authorized to perfom this transaction; na tiff you be!`});
+
+        const transactions = await getTransactions(accountID);
+
+        if(transactions.length === 0) return res.status(404).json({message: `No transdaction record found for this account.`});
+
+        return res.status(200).json({transactions});
+        
+    } catch (error) {
+
+        console.error(`Error getting transactions. Error: ${error}`);
 
         return res.status(500).json({error: `Internal Server Error.`});
         

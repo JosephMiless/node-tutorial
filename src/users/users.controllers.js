@@ -5,10 +5,14 @@ import { findUserByEmail, signUpUser } from './users.services.js';
 import { generateUniqueNumber } from '../utils/accountNumber.js';
 import { BankAccount } from '../models/bankaccount.js';
 import { createAccount } from '../accounts/accounts.services.js';
+import { sequelize } from '../config/sequelize.js';
 
 
 
 export const signUpUserController = async (req, res) => {
+
+    const t = await sequelize.transaction();
+
     try {
 
         // first thing is to validate the users's input- using joi 
@@ -24,21 +28,31 @@ export const signUpUserController = async (req, res) => {
           let user = await findUserByEmail({email: value.email});
 
           // throw an error if a user was found with that email
-          if(user) return res.status(400).json({error: `Account already exists`});
+          if(user) {
+
+            await t.rollback();
+
+            return res.status(400).json({error: `Account already exists`});
+              
+        }
           
           // hash, or encrypt user's password before storing into DB
           value.password = await hashPassword(password);
           
-          user = await signUpUser(value);
+          user = await signUpUser(value, {transaction: t});
 
         //   create an account for the user if no error
         let accountNumber = await generateUniqueNumber(10, BankAccount);
 
-        const bankAccount = await createAccount({userID: user.id, accountNumber, accountType});
+        const bankAccount = await createAccount({userID: user.id, accountNumber, accountType}, {transaction: t});
+
+        await t.commit();
 
         return res.status(201).json({message: `user registered sucessfully`, user: user.toJSON(), bank: bankAccount.toJSON()});
         
     } catch (error) {
+
+        await t.rollback();
 
         console.log(`Error signing up user`, error);
 
