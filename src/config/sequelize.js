@@ -8,7 +8,6 @@ import { config } from "./env.js";
 // });
 
 const isProduction = config.nodeEnv === 'production';
-// const isLocalDevelopment = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
 
 export const sequelize = new Sequelize(config.databaseURI, {
     logging: false,
